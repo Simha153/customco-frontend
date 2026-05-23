@@ -9,6 +9,9 @@ import ProductDetailPage from './pages/ProductDetailPage'
 import CartPage          from './pages/CartPage'
 import OrdersPage        from './pages/OrdersPage'
 import QuotePage         from './pages/QuotePage'
+import ProfilePage       from './pages/ProfilePage'
+import AdminDashboard    from './pages/admin/AdminDashboard'
+import AdminProducts     from './pages/admin/AdminProducts'
 
 function App() {
   return (
@@ -16,14 +19,17 @@ function App() {
       <AuthProvider>
         <Layout>
           <Routes>
-            <Route path="/"             element={<HomePage />} />
-            <Route path="/login"        element={<LoginPage />} />
-            <Route path="/register"     element={<RegisterPage />} />
-            <Route path="/products"     element={<ProductsPage />} />
-            <Route path="/products/:id" element={<ProductDetailPage />} />
-            <Route path="/cart"         element={<CartPage />} />
-            <Route path="/orders"       element={<OrdersPage />} />
-            <Route path="/quote"        element={<QuotePage />} />
+            <Route path="/"                  element={<HomePage />} />
+            <Route path="/login"             element={<LoginPage />} />
+            <Route path="/register"          element={<RegisterPage />} />
+            <Route path="/products"          element={<ProductsPage />} />
+            <Route path="/products/:id"      element={<ProductDetailPage />} />
+            <Route path="/cart"              element={<CartPage />} />
+            <Route path="/orders"            element={<OrdersPage />} />
+            <Route path="/quote"             element={<QuotePage />} />
+            <Route path="/profile"           element={<ProfilePage />} />
+            <Route path="/admin"             element={<AdminDashboard />} />
+            <Route path="/admin/products"    element={<AdminProducts />} />
           </Routes>
         </Layout>
       </AuthProvider>
