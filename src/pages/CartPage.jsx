@@ -55,44 +55,53 @@ export default function CartPage() {
   const subtotal = cart.reduce((sum, i) => sum + (i.price || i.product?.price || 0) * (i.quantity || 1), 0)
   const gst = Math.round(subtotal * 0.18)
   const total = subtotal + gst
-
   const C = '#1B3A6B', P = '#C8372D', G = '#5C6B3A'
 
   if (loading) return (
-    <div style={{display:'flex', justifyContent:'center', alignItems:'center', minHeight:'60vh', background:'#F5F0E8'}}>
-      <div style={{width:'32px', height:'32px', border:'2px solid #E3DED7', borderTopColor:C, borderRadius:'50%', animation:'spin 0.8s linear infinite'}}/>
+    <div style={{display:'flex',justifyContent:'center',alignItems:'center',minHeight:'60vh',background:'#F5F0E8'}}>
+      <div style={{width:'32px',height:'32px',border:'2px solid #E3DED7',borderTopColor:C,borderRadius:'50%',animation:'spin 0.8s linear infinite'}}/>
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
     </div>
   )
 
   return (
-    <div style={{background:'#F5F0E8', minHeight:'80vh', padding:'40px'}}>
-      {/* Header */}
-      <div style={{marginBottom:'32px'}}>
-        <p style={{fontFamily:'sans-serif', fontSize:'9px', letterSpacing:'0.3em', textTransform:'uppercase', color:C, marginBottom:'8px'}}>Your Selection</p>
-        <h1 style={{fontSize:'36px', color:'#1A1A18', fontWeight:400}}>
+    <div style={{background:'#F5F0E8',minHeight:'80vh',padding:'24px 16px'}}>
+      <style>{`
+        .cart-layout{display:grid;grid-template-columns:1fr 320px;gap:3px;align-items:start}
+        .cart-item-grid{display:grid;grid-template-columns:1fr 100px 80px 40px;gap:12px;padding:16px;background:#fff;border-bottom:0.5px solid rgba(28,28,24,0.06);align-items:center}
+        .cart-header{display:grid;grid-template-columns:1fr 100px 80px 40px;gap:12px;padding:10px 16px;border-bottom:1px solid rgba(28,28,24,0.1)}
+        @media(max-width:700px){
+          .cart-layout{grid-template-columns:1fr!important}
+          .cart-item-grid{grid-template-columns:1fr!important;gap:10px!important}
+          .cart-header{display:none!important}
+          .cart-item-price{display:flex;justify-content:space-between;align-items:center}
+        }
+      `}</style>
+
+      <div style={{marginBottom:'24px'}}>
+        <p style={{fontFamily:'sans-serif',fontSize:'9px',letterSpacing:'0.3em',textTransform:'uppercase',color:C,marginBottom:'8px'}}>Your Selection</p>
+        <h1 style={{fontSize:'28px',color:'#1A1A18',fontWeight:400}}>
           Shopping Cart
-          {cart.length > 0 && <em style={{fontStyle:'italic', color:'#8C8C88', fontSize:'24px', marginLeft:'12px'}}>{cart.length} {cart.length === 1 ? 'item' : 'items'}</em>}
+          {cart.length > 0 && <em style={{fontStyle:'italic',color:'#8C8C88',fontSize:'20px',marginLeft:'12px'}}>{cart.length} {cart.length===1?'item':'items'}</em>}
         </h1>
       </div>
 
       {cart.length === 0 ? (
-        <div style={{textAlign:'center', padding:'80px 20px', background:'#fff', border:'0.5px solid rgba(28,28,24,0.08)'}}>
-          <ShoppingBag size={48} style={{color:'#CBCAC7', marginBottom:'16px'}}/>
-          <p style={{fontSize:'20px', color:'#1A1A18', marginBottom:'8px'}}>Your cart is empty</p>
-          <p style={{fontFamily:'sans-serif', fontSize:'13px', color:'#8C8C88', marginBottom:'24px'}}>Browse our catalog and add items to get started.</p>
-          <Link to="/products" style={{fontFamily:'sans-serif', fontSize:'10px', letterSpacing:'0.18em', textTransform:'uppercase', background:C, color:'#fff', padding:'12px 28px', textDecoration:'none', fontWeight:700}}>
+        <div style={{textAlign:'center',padding:'60px 20px',background:'#fff',border:'0.5px solid rgba(28,28,24,0.08)'}}>
+          <ShoppingBag size={48} style={{color:'#CBCAC7',marginBottom:'16px'}}/>
+          <p style={{fontSize:'20px',color:'#1A1A18',marginBottom:'8px'}}>Your cart is empty</p>
+          <p style={{fontFamily:'sans-serif',fontSize:'13px',color:'#8C8C88',marginBottom:'24px'}}>Browse our catalog and add items to get started.</p>
+          <Link to="/products" style={{fontFamily:'sans-serif',fontSize:'10px',letterSpacing:'0.18em',textTransform:'uppercase',background:C,color:'#fff',padding:'12px 28px',textDecoration:'none',fontWeight:700}}>
             Browse Catalog
           </Link>
         </div>
       ) : (
-        <div style={{display:'grid', gridTemplateColumns:'1fr 360px', gap:'3px', alignItems:'start'}}>
+        <div className="cart-layout">
           {/* Cart items */}
           <div>
-            {/* Column headers */}
-            <div style={{display:'grid', gridTemplateColumns:'1fr 120px 100px 80px', gap:'16px', padding:'10px 16px', borderBottom:'1px solid rgba(28,28,24,0.1)'}}>
+            <div className="cart-header">
               {['Product','Quantity','Price',''].map(h => (
-                <span key={h} style={{fontFamily:'sans-serif', fontSize:'9px', letterSpacing:'0.2em', textTransform:'uppercase', color:'#8C8C88'}}>{h}</span>
+                <span key={h} style={{fontFamily:'sans-serif',fontSize:'9px',letterSpacing:'0.2em',textTransform:'uppercase',color:'#8C8C88'}}>{h}</span>
               ))}
             </div>
 
@@ -103,42 +112,38 @@ export default function CartPage() {
               const bgs   = ['#1B3A6B','#5C6B3A','#3D2314','#8C8C88']
               const bg    = bgs[idx % bgs.length]
               return (
-                <div key={item.id} style={{display:'grid', gridTemplateColumns:'1fr 120px 100px 80px', gap:'16px', padding:'20px 16px', background:'#fff', borderBottom:'0.5px solid rgba(28,28,24,0.06)', alignItems:'center'}}>
+                <div key={item.id} className="cart-item-grid">
                   {/* Product info */}
-                  <div style={{display:'flex', gap:'14px', alignItems:'center'}}>
-                    <div style={{width:'56px', height:'56px', background:bg, display:'flex', alignItems:'center', justifyContent:'center', fontSize:'22px', color:'rgba(255,255,255,0.15)', flexShrink:0}}>👔</div>
+                  <div style={{display:'flex',gap:'12px',alignItems:'center'}}>
+                    <div style={{width:'52px',height:'52px',background:bg,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'20px',color:'rgba(255,255,255,0.15)',flexShrink:0}}>👔</div>
                     <div>
-                      <p style={{fontFamily:'sans-serif', fontSize:'9px', letterSpacing:'0.15em', textTransform:'uppercase', color:C, marginBottom:'4px'}}>{cat}</p>
-                      <p style={{fontSize:'14px', color:'#1A1A18', marginBottom:'2px'}}>{name}</p>
-                      <p style={{fontFamily:'sans-serif', fontSize:'12px', color:'#8C8C88'}}>₹{Number(price).toLocaleString('en-IN')} / unit</p>
+                      {cat && <p style={{fontFamily:'sans-serif',fontSize:'9px',letterSpacing:'0.15em',textTransform:'uppercase',color:C,marginBottom:'2px'}}>{cat}</p>}
+                      <p style={{fontSize:'13px',color:'#1A1A18',marginBottom:'2px'}}>{name}</p>
+                      <p style={{fontFamily:'sans-serif',fontSize:'11px',color:'#8C8C88'}}>₹{Number(price).toLocaleString('en-IN')} / unit</p>
                     </div>
                   </div>
 
                   {/* Qty controls */}
-                  <div style={{display:'flex', alignItems:'center', gap:'8px'}}>
+                  <div style={{display:'flex',alignItems:'center',gap:'8px'}}>
                     <button onClick={() => updateQty(item.id, (item.quantity||1) - 1)}
-                      style={{width:'28px', height:'28px', border:'1px solid rgba(28,28,24,0.15)', background:'transparent', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', transition:'all 0.2s'}}
-                      onMouseEnter={e => { e.currentTarget.style.background=C; e.currentTarget.style.borderColor=C; e.currentTarget.querySelector('svg').style.color='#fff' }}
-                      onMouseLeave={e => { e.currentTarget.style.background='transparent'; e.currentTarget.style.borderColor='rgba(28,28,24,0.15)'; e.currentTarget.querySelector('svg').style.color='#1A1A18' }}>
+                      style={{width:'28px',height:'28px',border:'1px solid rgba(28,28,24,0.15)',background:'transparent',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}}>
                       <Minus size={12} color="#1A1A18"/>
                     </button>
-                    <span style={{fontFamily:'sans-serif', fontSize:'14px', color:'#1A1A18', minWidth:'24px', textAlign:'center'}}>{item.quantity || 1}</span>
+                    <span style={{fontFamily:'sans-serif',fontSize:'14px',color:'#1A1A18',minWidth:'20px',textAlign:'center'}}>{item.quantity||1}</span>
                     <button onClick={() => updateQty(item.id, (item.quantity||1) + 1)}
-                      style={{width:'28px', height:'28px', border:'1px solid rgba(28,28,24,0.15)', background:'transparent', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', transition:'all 0.2s'}}
-                      onMouseEnter={e => { e.currentTarget.style.background=C; e.currentTarget.style.borderColor=C; e.currentTarget.querySelector('svg').style.color='#fff' }}
-                      onMouseLeave={e => { e.currentTarget.style.background='transparent'; e.currentTarget.style.borderColor='rgba(28,28,24,0.15)'; e.currentTarget.querySelector('svg').style.color='#1A1A18' }}>
+                      style={{width:'28px',height:'28px',border:'1px solid rgba(28,28,24,0.15)',background:'transparent',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}}>
                       <Plus size={12} color="#1A1A18"/>
                     </button>
                   </div>
 
                   {/* Line total */}
-                  <p style={{fontFamily:'sans-serif', fontSize:'14px', color:C, fontWeight:600}}>
-                    ₹{(price * (item.quantity||1)).toLocaleString('en-IN')}
+                  <p style={{fontFamily:'sans-serif',fontSize:'14px',color:C,fontWeight:600}}>
+                    ₹{(price*(item.quantity||1)).toLocaleString('en-IN')}
                   </p>
 
                   {/* Remove */}
                   <button onClick={() => removeItem(item.id)}
-                    style={{background:'transparent', border:'none', cursor:'pointer', color:'#CBCAC7', padding:'4px', display:'flex', alignItems:'center', justifyContent:'center', transition:'color 0.2s'}}
+                    style={{background:'transparent',border:'none',cursor:'pointer',color:'#CBCAC7',padding:'4px',display:'flex',alignItems:'center',justifyContent:'center'}}
                     onMouseEnter={e => e.currentTarget.style.color=P}
                     onMouseLeave={e => e.currentTarget.style.color='#CBCAC7'}>
                     <Trash2 size={16}/>
@@ -149,33 +154,33 @@ export default function CartPage() {
           </div>
 
           {/* Order summary */}
-          <div style={{background:'#fff', border:'0.5px solid rgba(28,28,24,0.08)'}}>
-            <div style={{background:'#1A1A18', padding:'20px 24px'}}>
-              <p style={{fontFamily:'sans-serif', fontSize:'9px', letterSpacing:'0.25em', textTransform:'uppercase', color:'rgba(255,255,255,0.45)', marginBottom:'4px'}}>Order Summary</p>
-              <p style={{fontSize:'20px', color:'#fff', fontWeight:400}}>Your Total</p>
+          <div style={{background:'#fff',border:'0.5px solid rgba(28,28,24,0.08)'}}>
+            <div style={{background:'#1A1A18',padding:'20px 24px'}}>
+              <p style={{fontFamily:'sans-serif',fontSize:'9px',letterSpacing:'0.25em',textTransform:'uppercase',color:'rgba(255,255,255,0.45)',marginBottom:'4px'}}>Order Summary</p>
+              <p style={{fontSize:'20px',color:'#fff',fontWeight:400}}>Your Total</p>
             </div>
             <div style={{padding:'24px'}}>
-              <div style={{display:'flex', justifyContent:'space-between', fontFamily:'sans-serif', fontSize:'13px', color:'#8C8C88', marginBottom:'10px'}}>
+              <div style={{display:'flex',justifyContent:'space-between',fontFamily:'sans-serif',fontSize:'13px',color:'#8C8C88',marginBottom:'10px'}}>
                 <span>Subtotal ({cart.length} items)</span>
                 <span>₹{subtotal.toLocaleString('en-IN')}</span>
               </div>
-              <div style={{display:'flex', justifyContent:'space-between', fontFamily:'sans-serif', fontSize:'13px', color:'#8C8C88', marginBottom:'10px'}}>
+              <div style={{display:'flex',justifyContent:'space-between',fontFamily:'sans-serif',fontSize:'13px',color:'#8C8C88',marginBottom:'10px'}}>
                 <span>GST (18%)</span>
                 <span>₹{gst.toLocaleString('en-IN')}</span>
               </div>
-              <div style={{display:'flex', justifyContent:'space-between', fontFamily:'sans-serif', fontSize:'13px', color:'#8C8C88', marginBottom:'10px', paddingBottom:'16px', borderBottom:'1px solid rgba(28,28,24,0.08)'}}>
+              <div style={{display:'flex',justifyContent:'space-between',fontFamily:'sans-serif',fontSize:'13px',color:'#8C8C88',marginBottom:'10px',paddingBottom:'16px',borderBottom:'1px solid rgba(28,28,24,0.08)'}}>
                 <span>Shipping</span>
-                <span style={{color:G, fontWeight:600}}>Free</span>
+                <span style={{color:G,fontWeight:600}}>Free</span>
               </div>
-              <div style={{display:'flex', justifyContent:'space-between', fontSize:'18px', color:'#1A1A18', marginBottom:'24px', fontWeight:500}}>
+              <div style={{display:'flex',justifyContent:'space-between',fontSize:'18px',color:'#1A1A18',marginBottom:'24px',fontWeight:500}}>
                 <span>Total</span>
                 <span style={{color:C}}>₹{total.toLocaleString('en-IN')}</span>
               </div>
               <button onClick={placeOrder} disabled={placing}
-                style={{width:'100%', background: placing ? '#8C8C88' : P, color:'#fff', border:'none', padding:'14px', fontFamily:'sans-serif', fontSize:'10px', letterSpacing:'0.18em', textTransform:'uppercase', fontWeight:700, cursor: placing ? 'default' : 'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', transition:'background 0.2s'}}>
+                style={{width:'100%',background:placing?'#8C8C88':P,color:'#fff',border:'none',padding:'14px',fontFamily:'sans-serif',fontSize:'10px',letterSpacing:'0.18em',textTransform:'uppercase',fontWeight:700,cursor:placing?'default':'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:'8px',transition:'background 0.2s'}}>
                 {placing ? 'Placing Order...' : <><ArrowRight size={14}/> Place Order</>}
               </button>
-              <Link to="/products" style={{display:'block', textAlign:'center', fontFamily:'sans-serif', fontSize:'11px', color:'#8C8C88', marginTop:'14px', textDecoration:'none'}}>
+              <Link to="/products" style={{display:'block',textAlign:'center',fontFamily:'sans-serif',fontSize:'11px',color:'#8C8C88',marginTop:'14px',textDecoration:'none'}}>
                 ← Continue shopping
               </Link>
             </div>
