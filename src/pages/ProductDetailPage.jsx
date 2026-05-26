@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Heart, Share2, ShoppingBag, Zap, ChevronDown, ChevronUp, Check } from 'lucide-react'
+import { ArrowLeft, Heart, Share2, ShoppingBag, Zap, ChevronDown, ChevronUp, Check, Droplets, Wind, Thermometer, Sun } from 'lucide-react'
 import { productAPI, cartAPI } from '../services/api'
 import { useAuth } from '../context/AuthContext'
 import toast from 'react-hot-toast'
@@ -67,43 +67,101 @@ export default function ProductDetailPage() {
   const discount = originalPrice > product.price
     ? Math.round(((originalPrice - product.price) / originalPrice) * 100)
     : 0
-  const specs = [
-    { l:'Style', v:'Oversized Fit for a relaxed silhouette' },
-    { l:'Material', v: product.brand ? `100% Premium Cotton` : '100% Premium Cotton' },
-    { l:'Fabric Weight', v:'240 GSM — substantial, structured, breathable' },
-    { l:'Fit', v:'Designed to drape naturally without clinging' },
-    { l:'Season', v:'Ideal for year-round wear' },
+
+  const quickDetails = [
+    { icon:'🧵', label:'Material', value:'100% Premium Cotton' },
+    { icon:'⚖️', label:'Fabric weight', value:'240 GSM (thick & solid)' },
+    { icon:'📐', label:'Fit', value:'Oversized, relaxed' },
+    { icon:'☀️', label:'Season', value:'All year round' },
+    { icon:'🤲', label:'Feel', value:'Soft, gets better with washes' },
+    { icon:'🛡️', label:'Durability', value:'Holds shape & color over time' },
+  ]
+
+  const washCare = [
+    { icon:'💧', label:'Cold wash' },
+    { icon:'💨', label:'Air dry / hang dry' },
+    { icon:'🔥', label:'Iron on low heat' },
+    { icon:'⚠️', label:'Gentle cycle only' },
   ]
 
   return (
     <div style={{ background:'#fff', minHeight:'100vh' }}>
       <style>{`
-        .pdp-grid { display:grid; grid-template-columns:1fr 1fr; min-height:100vh }
-        .pdp-img-side { position:sticky; top:89px; height:calc(100vh - 89px); background:${bg}; display:flex; align-items:center; justify-content:center; overflow:hidden }
-        .pdp-info-side { padding:48px 40px; background:#fff }
-        .size-btn { width:52px; height:52px; border:1.5px solid rgba(28,28,24,0.18); background:transparent; cursor:pointer; font-family:sans-serif; font-size:12px; font-weight:600; color:#1A1A18; display:flex; align-items:center; justify-content:center; transition:all 0.15s; border-radius:4px }
+        .pdp-grid { display:grid; grid-template-columns:1fr 1fr; min-height:100vh; align-items:start }
+        .pdp-img-side { position:sticky; top:89px; height:calc(100vh - 89px); display:flex; flex-direction:column }
+        .pdp-img-container { position:relative; flex:1; background:${bg}; display:flex; align-items:center; justify-content:center; overflow:hidden; min-height:0 }
+        .pdp-info-side { padding:40px 40px; background:#fff; overflow-y:auto }
+
+        /* Glass overlay at bottom of image */
+        .img-overlay { 
+          position:absolute; bottom:0; left:0; right:0;
+          background:rgba(255,255,255,0.12);
+          backdrop-filter:blur(16px);
+          -webkit-backdrop-filter:blur(16px);
+          border-top:1px solid rgba(255,255,255,0.2);
+          padding:20px 24px;
+        }
+        .overlay-title {
+          font-family:sans-serif; font-size:9px; letter-spacing:0.25em;
+          text-transform:uppercase; color:rgba(255,255,255,0.6);
+          margin-bottom:12px; font-weight:600;
+        }
+        .overlay-grid {
+          display:grid; grid-template-columns:repeat(3,1fr); gap:10px;
+        }
+        .overlay-item {
+          background:rgba(255,255,255,0.1);
+          border:1px solid rgba(255,255,255,0.15);
+          border-radius:8px; padding:10px 12px;
+        }
+        .overlay-item-label {
+          font-family:sans-serif; font-size:9px;
+          color:rgba(255,255,255,0.55); text-transform:uppercase;
+          letter-spacing:0.12em; margin-bottom:3px;
+        }
+        .overlay-item-value {
+          font-family:sans-serif; font-size:12px;
+          color:#fff; font-weight:600; line-height:1.3;
+        }
+        .wash-chips { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+        .wash-chip {
+          display:inline-flex; align-items:center; gap:6px;
+          background:rgba(255,255,255,0.12);
+          border:1px solid rgba(255,255,255,0.2);
+          border-radius:999px; padding:5px 12px;
+          font-family:sans-serif; font-size:11px;
+          color:rgba(255,255,255,0.9); font-weight:500;
+        }
+
+        .size-btn { width:48px; height:48px; border:1.5px solid rgba(28,28,24,0.18); background:transparent; cursor:pointer; font-family:sans-serif; font-size:12px; font-weight:600; color:#1A1A18; display:flex; align-items:center; justify-content:center; transition:all 0.15s; border-radius:4px }
         .size-btn:hover { border-color:#1A1A18 }
         .size-btn.active { background:#1A1A18; color:#fff; border-color:#1A1A18 }
-        .btn-cart { flex:1; background:#1A1A18; color:#fff; border:none; padding:16px; font-family:sans-serif; font-size:11px; letter-spacing:0.18em; text-transform:uppercase; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; transition:background 0.2s; border-radius:4px }
+        .btn-cart { flex:1; background:#1A1A18; color:#fff; border:none; padding:15px; font-family:sans-serif; font-size:11px; letter-spacing:0.18em; text-transform:uppercase; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; transition:background 0.2s; border-radius:4px }
         .btn-cart:hover { background:#333 }
         .btn-cart:disabled { background:#8C8C88; cursor:default }
-        .btn-buy { flex:1; background:#C8372D; color:#fff; border:none; padding:16px; font-family:sans-serif; font-size:11px; letter-spacing:0.18em; text-transform:uppercase; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; transition:background 0.2s; border-radius:4px }
+        .btn-buy { width:100%; background:#C8372D; color:#fff; border:none; padding:15px; font-family:sans-serif; font-size:11px; letter-spacing:0.18em; text-transform:uppercase; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; transition:background 0.2s; border-radius:4px; margin-bottom:20px }
         .btn-buy:hover { background:#a82d24 }
         .btn-buy:disabled { background:#8C8C88; cursor:default }
-        .accordion-btn { width:100%; display:flex; justify-content:space-between; align-items:center; background:transparent; border:none; border-top:1px solid rgba(28,28,24,0.08); padding:16px 0; cursor:pointer; font-family:sans-serif; font-size:11px; letter-spacing:0.18em; text-transform:uppercase; color:#1A1A18; font-weight:600 }
+        .accordion-btn { width:100%; display:flex; justify-content:space-between; align-items:center; background:transparent; border:none; border-top:1px solid rgba(28,28,24,0.08); padding:14px 0; cursor:pointer; font-family:sans-serif; font-size:11px; letter-spacing:0.18em; text-transform:uppercase; color:#1A1A18; font-weight:600 }
         .spec-row { display:flex; gap:12px; padding:8px 0; border-bottom:0.5px solid rgba(28,28,24,0.06); font-family:sans-serif; font-size:13px }
         .wishlist-btn { width:48px; height:48px; border:1.5px solid rgba(28,28,24,0.18); background:transparent; cursor:pointer; display:flex; align-items:center; justify-content:center; border-radius:4px; transition:all 0.2s; flex-shrink:0 }
         .wishlist-btn:hover { border-color:#C8372D }
-        .wishlist-btn.active { background:#fff0f0; border-color:#C8372D }
+        .quick-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-bottom:20px }
+        .quick-card { background:#F5F0E8; border-radius:8px; padding:12px 14px; }
+        .quick-label { font-family:sans-serif; font-size:10px; color:#8C8C88; margin-bottom:4px; }
+        .quick-value { font-family:sans-serif; font-size:13px; font-weight:600; color:#1A1A18; line-height:1.3; }
+
         @media(max-width:768px){
-          .pdp-grid { grid-template-columns:1fr!important; min-height:auto!important }
-          .pdp-img-side { position:relative!important; height:360px!important; top:0!important }
+          .pdp-grid { grid-template-columns:1fr!important }
+          .pdp-img-side { position:relative!important; height:480px!important; top:0!important }
           .pdp-info-side { padding:24px 16px!important }
+          .overlay-grid { grid-template-columns:repeat(2,1fr)!important }
+          .quick-grid { grid-template-columns:repeat(2,1fr)!important }
         }
       `}</style>
 
       {/* Breadcrumb */}
-      <div style={{ padding:'12px 24px', borderBottom:'0.5px solid rgba(28,28,24,0.08)', display:'flex', alignItems:'center', gap:'8px', fontFamily:'sans-serif', fontSize:'11px', color:'#8C8C88' }}>
+      <div style={{ padding:'10px 24px', borderBottom:'0.5px solid rgba(28,28,24,0.08)', display:'flex', alignItems:'center', gap:'8px', fontFamily:'sans-serif', fontSize:'11px', color:'#8C8C88' }}>
         <Link to="/" style={{ color:'#8C8C88', textDecoration:'none' }}>Home</Link>
         <span>›</span>
         <Link to="/products" style={{ color:'#8C8C88', textDecoration:'none' }}>All Clothing</Link>
@@ -112,186 +170,192 @@ export default function ProductDetailPage() {
       </div>
 
       <div className="pdp-grid">
-        {/* LEFT — Image */}
+
+        {/* ── LEFT — Sticky image with glass overlay ── */}
         <div className="pdp-img-side">
-          {/* Badges */}
-          <div style={{ position:'absolute', top:20, left:20, display:'flex', flexDirection:'column', gap:8 }}>
+          <div className="pdp-img-container">
+
+            {/* Discount badge */}
             {discount > 0 && (
-              <span style={{ background:'#C8372D', color:'#fff', fontFamily:'sans-serif', fontSize:'11px', fontWeight:700, padding:'4px 10px', borderRadius:'2px' }}>
+              <div style={{ position:'absolute', top:16, left:16, background:'#C8372D', color:'#fff', fontFamily:'sans-serif', fontSize:'11px', fontWeight:700, padding:'4px 10px', borderRadius:'2px', zIndex:2 }}>
                 −{discount}%
-              </span>
+              </div>
             )}
-            {product.stockQuantity <= 10 && product.stockQuantity > 0 && (
-              <span style={{ background:'#1A1A18', color:'#fff', fontFamily:'sans-serif', fontSize:'11px', fontWeight:700, padding:'4px 10px', borderRadius:'2px' }}>
-                LOW STOCK
-              </span>
-            )}
-          </div>
-          {/* Product image placeholder */}
-          <div style={{ fontSize:'120px', color:'rgba(255,255,255,0.12)', userSelect:'none' }}>👔</div>
-          {/* Size indicator on image */}
-          <div style={{ position:'absolute', bottom:20, left:20, background:'rgba(255,255,255,0.9)', padding:'6px 12px', borderRadius:'2px', fontFamily:'sans-serif', fontSize:'11px', fontWeight:700, color:'#1A1A18', backdropFilter:'blur(8px)' }}>
-            Size: {selectedSize}
+
+            {/* Product emoji placeholder */}
+            <div style={{ fontSize:'120px', color:'rgba(255,255,255,0.12)', userSelect:'none', marginBottom:'180px' }}>👔</div>
+
+            {/* ── GLASS OVERLAY at bottom of image ── */}
+            <div className="img-overlay">
+              <div className="overlay-title">Quick details</div>
+              <div className="overlay-grid">
+                <div className="overlay-item">
+                  <div className="overlay-item-label">Material</div>
+                  <div className="overlay-item-value">100% Premium Cotton</div>
+                </div>
+                <div className="overlay-item">
+                  <div className="overlay-item-label">Fabric weight</div>
+                  <div className="overlay-item-value">240 GSM thick & solid</div>
+                </div>
+                <div className="overlay-item">
+                  <div className="overlay-item-label">Fit</div>
+                  <div className="overlay-item-value">Oversized, relaxed</div>
+                </div>
+              </div>
+
+              {/* Wash care chips */}
+              <div style={{ marginTop:'12px' }}>
+                <div className="overlay-title" style={{ marginBottom:'8px' }}>Wash care</div>
+                <div className="wash-chips">
+                  {washCare.map(w => (
+                    <span key={w.label} className="wash-chip">
+                      {w.icon} {w.label}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* RIGHT — Info */}
+        {/* ── RIGHT — Product info ── */}
         <div className="pdp-info-side">
-          {/* Category + brand */}
-          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'12px' }}>
+
+          {/* Category */}
+          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'10px' }}>
             <span style={{ fontFamily:'sans-serif', fontSize:'10px', letterSpacing:'0.25em', textTransform:'uppercase', color:'#1B3A6B', fontWeight:600 }}>
               {product.category?.name || product.category || 'General'}
             </span>
-            <span style={{ fontFamily:'sans-serif', fontSize:'10px', letterSpacing:'0.12em', textTransform:'uppercase', color:'#8C8C88' }}>
-              {product.brand || 'Custom.Co'}
+            <span style={{ fontFamily:'sans-serif', fontSize:'10px', color:'#8C8C88' }}>
+              By {product.brand || 'Custom.Co'}
             </span>
           </div>
 
-          {/* Product name */}
-          <h1 style={{ fontSize:'clamp(24px,3vw,36px)', color:'#1A1A18', fontWeight:400, lineHeight:1.1, marginBottom:'20px', fontFamily:'Georgia,serif' }}>
+          {/* Name */}
+          <h1 style={{ fontSize:'clamp(22px,3vw,34px)', color:'#1A1A18', fontWeight:400, lineHeight:1.1, marginBottom:'14px', fontFamily:'Georgia,serif' }}>
             {product.name}
           </h1>
 
           {/* Description */}
           <p style={{ fontFamily:'sans-serif', fontSize:'13px', color:'#6b6b68', lineHeight:'1.7', marginBottom:'20px' }}>
-            {product.description || 'Not just a tee. It\'s the foundation of your entire vibe. Pure, clean energy — crafted for businesses that refuse to blend in.'}
+            {product.description || 'A premium garment built for everyday wear. Clean look, solid feel, easy to style. Crafted for businesses that refuse to blend in.'}
           </p>
 
           {/* Price */}
-          <div style={{ display:'flex', alignItems:'baseline', gap:'12px', marginBottom:'28px' }}>
+          <div style={{ display:'flex', alignItems:'baseline', gap:'12px', marginBottom:'24px' }}>
             {discount > 0 && (
-              <span style={{ fontFamily:'sans-serif', fontSize:'16px', color:'#8C8C88', textDecoration:'line-through' }}>
+              <span style={{ fontFamily:'sans-serif', fontSize:'15px', color:'#8C8C88', textDecoration:'line-through' }}>
                 ₹{Number(originalPrice).toLocaleString('en-IN')}
               </span>
             )}
-            <span style={{ fontSize:'32px', color:'#1A1A18', fontWeight:700, fontFamily:'sans-serif' }}>
+            <span style={{ fontSize:'30px', color:'#1A1A18', fontWeight:700, fontFamily:'sans-serif' }}>
               ₹{Number(product.price || 0).toLocaleString('en-IN')}
             </span>
             {discount > 0 && (
-              <span style={{ fontFamily:'sans-serif', fontSize:'12px', color:'#C8372D', fontWeight:700 }}>
+              <span style={{ fontFamily:'sans-serif', fontSize:'12px', color:'#C8372D', fontWeight:700, background:'#fff0f0', padding:'2px 8px', borderRadius:'4px' }}>
                 SAVE ₹{Number(originalPrice - product.price).toLocaleString('en-IN')}
               </span>
             )}
           </div>
 
           {/* Sizes */}
-          <div style={{ marginBottom:'28px' }}>
-            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'12px' }}>
+          <div style={{ marginBottom:'24px' }}>
+            <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'10px' }}>
               <span style={{ fontFamily:'sans-serif', fontSize:'10px', letterSpacing:'0.2em', textTransform:'uppercase', color:'#1A1A18', fontWeight:600 }}>Sizes</span>
-              <span style={{ fontFamily:'sans-serif', fontSize:'11px', color:'#C8372D', textDecoration:'underline', cursor:'pointer' }}>Size chart</span>
+              <span style={{ fontFamily:'sans-serif', fontSize:'11px', color:'#C8372D', cursor:'pointer', textDecoration:'underline' }}>Size chart</span>
             </div>
             <div style={{ display:'flex', gap:'8px', flexWrap:'wrap' }}>
               {SIZES.map(s => (
-                <button key={s} className={`size-btn${selectedSize===s?' active':''}`}
-                  onClick={() => setSelectedSize(s)}>
-                  {s}
-                </button>
+                <button key={s} className={`size-btn${selectedSize===s?' active':''}`} onClick={() => setSelectedSize(s)}>{s}</button>
               ))}
             </div>
           </div>
 
           {/* Quantity */}
-          <div style={{ marginBottom:'24px' }}>
-            <span style={{ fontFamily:'sans-serif', fontSize:'10px', letterSpacing:'0.2em', textTransform:'uppercase', color:'#1A1A18', fontWeight:600, display:'block', marginBottom:'12px' }}>Quantity</span>
-            <div style={{ display:'flex', alignItems:'center', gap:'0' }}>
-              <button onClick={() => setQty(q => Math.max(1, q-1))}
-                style={{ width:'44px', height:'44px', border:'1.5px solid rgba(28,28,24,0.18)', background:'transparent', cursor:'pointer', fontSize:'18px', display:'flex', alignItems:'center', justifyContent:'center', borderRadius:'4px 0 0 4px' }}>
-                −
-              </button>
-              <div style={{ width:'56px', height:'44px', border:'1.5px solid rgba(28,28,24,0.18)', borderLeft:'none', borderRight:'none', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'sans-serif', fontSize:'15px', fontWeight:600 }}>
-                {qty}
-              </div>
-              <button onClick={() => setQty(q => q+1)}
-                style={{ width:'44px', height:'44px', border:'1.5px solid rgba(28,28,24,0.18)', background:'transparent', cursor:'pointer', fontSize:'18px', display:'flex', alignItems:'center', justifyContent:'center', borderRadius:'0 4px 4px 0' }}>
-                +
-              </button>
-              <span style={{ fontFamily:'sans-serif', fontSize:'13px', color:'#8C8C88', marginLeft:'12px' }}>
-                = ₹{(qty * (product.price || 0)).toLocaleString('en-IN')}
-              </span>
+          <div style={{ marginBottom:'20px' }}>
+            <span style={{ fontFamily:'sans-serif', fontSize:'10px', letterSpacing:'0.2em', textTransform:'uppercase', color:'#1A1A18', fontWeight:600, display:'block', marginBottom:'10px' }}>Quantity</span>
+            <div style={{ display:'flex', alignItems:'center' }}>
+              <button onClick={() => setQty(q => Math.max(1,q-1))} style={{ width:'42px', height:'42px', border:'1.5px solid rgba(28,28,24,0.18)', background:'transparent', cursor:'pointer', fontSize:'16px', display:'flex', alignItems:'center', justifyContent:'center', borderRadius:'4px 0 0 4px' }}>−</button>
+              <div style={{ width:'52px', height:'42px', border:'1.5px solid rgba(28,28,24,0.18)', borderLeft:'none', borderRight:'none', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'sans-serif', fontSize:'15px', fontWeight:600 }}>{qty}</div>
+              <button onClick={() => setQty(q => q+1)} style={{ width:'42px', height:'42px', border:'1.5px solid rgba(28,28,24,0.18)', background:'transparent', cursor:'pointer', fontSize:'16px', display:'flex', alignItems:'center', justifyContent:'center', borderRadius:'0 4px 4px 0' }}>+</button>
+              <span style={{ fontFamily:'sans-serif', fontSize:'13px', color:'#8C8C88', marginLeft:'12px' }}>= ₹{(qty*(product.price||0)).toLocaleString('en-IN')}</span>
             </div>
           </div>
 
           {/* CTA Buttons */}
-          <div style={{ display:'flex', gap:'10px', marginBottom:'16px' }}>
+          <div style={{ display:'flex', gap:'10px', marginBottom:'12px' }}>
             <button className="btn-cart" onClick={addToCart} disabled={adding}>
-              <ShoppingBag size={16}/> {adding ? 'Adding...' : 'Add to cart'}
+              <ShoppingBag size={15}/> {adding ? 'Adding...' : 'Add to cart'}
             </button>
-            <button className="wishlist-btn" onClick={() => setWishlist(w => !w)}
-              style={{ color: wishlist ? '#C8372D' : '#8C8C88' }}>
-              <Heart size={18} fill={wishlist ? '#C8372D' : 'none'} color={wishlist ? '#C8372D' : '#8C8C88'}/>
+            <button className="wishlist-btn" onClick={() => setWishlist(w => !w)}>
+              <Heart size={18} fill={wishlist?'#C8372D':'none'} color={wishlist?'#C8372D':'#8C8C88'}/>
             </button>
           </div>
-          <button className="btn-buy" onClick={buyNow} disabled={adding} style={{ width:'100%', marginBottom:'24px' }}>
-            <Zap size={16}/> Buy now
+          <button className="btn-buy" onClick={buyNow} disabled={adding}>
+            <Zap size={15}/> Buy now
           </button>
 
           {/* Trust badges */}
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'8px', marginBottom:'28px' }}>
-            {[
-              { icon:'🚚', text:'Free shipping above ₹999' },
-              { icon:'↩️', text:'Easy 7-day returns' },
-              { icon:'✅', text:'100% genuine product' },
-            ].map(b => (
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'8px', marginBottom:'24px' }}>
+            {[{icon:'🚚',text:'Free shipping above ₹999'},{icon:'↩️',text:'Easy 7-day returns'},{icon:'✅',text:'100% genuine product'}].map(b => (
               <div key={b.text} style={{ background:'#F5F0E8', borderRadius:'6px', padding:'10px 8px', textAlign:'center' }}>
-                <div style={{ fontSize:'18px', marginBottom:'4px' }}>{b.icon}</div>
+                <div style={{ fontSize:'16px', marginBottom:'4px' }}>{b.icon}</div>
                 <div style={{ fontFamily:'sans-serif', fontSize:'10px', color:'#6b6b68', lineHeight:'1.4' }}>{b.text}</div>
               </div>
             ))}
           </div>
 
-          {/* Accordion — Product details */}
+          {/* Quick details cards */}
           <button className="accordion-btn" onClick={() => setDetailsOpen(o => !o)}>
             <span>Product details</span>
-            {detailsOpen ? <ChevronUp size={16}/> : <ChevronDown size={16}/>}
+            {detailsOpen ? <ChevronUp size={15}/> : <ChevronDown size={15}/>}
           </button>
           {detailsOpen && (
-            <div style={{ padding:'12px 0 20px' }}>
-              {specs.map(s => (
-                <div key={s.l} className="spec-row">
-                  <span style={{ color:'#8C8C88', minWidth:'120px', flexShrink:0 }}>
-                    <Check size={12} style={{ marginRight:'6px', color:'#1B3A6B' }}/>{s.l}
-                  </span>
-                  <span style={{ color:'#1A1A18', fontWeight:500 }}>{s.v}</span>
-                </div>
-              ))}
+            <div style={{ padding:'12px 0 16px' }}>
+              <div className="quick-grid">
+                {quickDetails.map(d => (
+                  <div key={d.label} className="quick-card">
+                    <div className="quick-label">{d.icon} {d.label}</div>
+                    <div className="quick-value">{d.value}</div>
+                  </div>
+                ))}
+              </div>
               {product.stockQuantity && (
-                <div className="spec-row">
-                  <span style={{ color:'#8C8C88', minWidth:'120px', flexShrink:0 }}>
-                    <Check size={12} style={{ marginRight:'6px', color:'#1B3A6B' }}/>Stock
-                  </span>
-                  <span style={{ color:'#1A1A18', fontWeight:500 }}>{product.stockQuantity} units available</span>
-                </div>
-              )}
-              {product.sku && (
-                <div className="spec-row">
-                  <span style={{ color:'#8C8C88', minWidth:'120px', flexShrink:0 }}>
-                    <Check size={12} style={{ marginRight:'6px', color:'#1B3A6B' }}/>SKU
-                  </span>
-                  <span style={{ color:'#1A1A18', fontWeight:500, fontFamily:'monospace', fontSize:'12px' }}>{product.sku}</span>
+                <div style={{ fontFamily:'sans-serif', fontSize:'13px', color:'#5C6B3A', fontWeight:500, marginTop:'4px' }}>
+                  ✓ {product.stockQuantity} units in stock
                 </div>
               )}
             </div>
           )}
 
-          {/* Accordion — Wash care */}
+          {/* Wash care accordion */}
           <button className="accordion-btn" onClick={() => setCareOpen(o => !o)}>
             <span>Wash care</span>
-            {careOpen ? <ChevronUp size={16}/> : <ChevronDown size={16}/>}
+            {careOpen ? <ChevronUp size={15}/> : <ChevronDown size={15}/>}
           </button>
           {careOpen && (
-            <div style={{ padding:'12px 0 20px', fontFamily:'sans-serif', fontSize:'13px', color:'#6b6b68', lineHeight:'1.7' }}>
-              Machine wash cold, gentle cycle. Air dry or hang to retain quality. Iron on low heat for crispness. Do not bleach or tumble dry.
+            <div style={{ padding:'12px 0 16px' }}>
+              <div style={{ display:'flex', gap:'8px', flexWrap:'wrap' }}>
+                {washCare.map(w => (
+                  <span key={w.label} style={{ display:'inline-flex', alignItems:'center', gap:'6px', background:'#F5F0E8', border:'1px solid rgba(28,28,24,0.1)', borderRadius:'999px', padding:'6px 14px', fontFamily:'sans-serif', fontSize:'12px', color:'#1A1A18', fontWeight:500 }}>
+                    {w.icon} {w.label}
+                  </span>
+                ))}
+              </div>
+              <p style={{ fontFamily:'sans-serif', fontSize:'12px', color:'#8C8C88', lineHeight:'1.7', marginTop:'12px' }}>
+                Machine wash cold, gentle cycle. Air dry or hang to retain quality. Iron on low heat for crispness. Do not bleach or tumble dry.
+              </p>
             </div>
           )}
 
           {/* Share */}
-          <div style={{ display:'flex', alignItems:'center', gap:'12px', marginTop:'24px', paddingTop:'20px', borderTop:'0.5px solid rgba(28,28,24,0.08)' }}>
-            <span style={{ fontFamily:'sans-serif', fontSize:'11px', letterSpacing:'0.15em', textTransform:'uppercase', color:'#8C8C88' }}>Share</span>
+          <div style={{ display:'flex', alignItems:'center', gap:'12px', marginTop:'20px', paddingTop:'16px', borderTop:'0.5px solid rgba(28,28,24,0.08)' }}>
+            <span style={{ fontFamily:'sans-serif', fontSize:'10px', letterSpacing:'0.15em', textTransform:'uppercase', color:'#8C8C88' }}>Share</span>
             <button onClick={() => { navigator.clipboard?.writeText(window.location.href); toast.success('Link copied!') }}
               style={{ display:'flex', alignItems:'center', gap:'6px', background:'transparent', border:'1px solid rgba(28,28,24,0.12)', padding:'6px 12px', borderRadius:'4px', cursor:'pointer', fontFamily:'sans-serif', fontSize:'11px', color:'#1A1A18' }}>
               <Share2 size={12}/> Copy link
             </button>
-            <Link to="/quote" style={{ display:'flex', alignItems:'center', gap:'6px', background:'transparent', border:'1px solid rgba(28,28,24,0.12)', padding:'6px 12px', borderRadius:'4px', cursor:'pointer', fontFamily:'sans-serif', fontSize:'11px', color:'#1A1A18', textDecoration:'none' }}>
+            <Link to="/quote" style={{ display:'flex', alignItems:'center', gap:'6px', background:'transparent', border:'1px solid rgba(28,28,24,0.12)', padding:'6px 12px', borderRadius:'4px', fontFamily:'sans-serif', fontSize:'11px', color:'#1A1A18', textDecoration:'none' }}>
               📋 Bulk order
             </Link>
           </div>
