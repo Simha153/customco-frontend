@@ -12,7 +12,7 @@ export function AuthProvider({ children }) {
     if (t && u) { try { setToken(t); setUser(JSON.parse(u)) } catch(e) {} }
     setLoading(false)
   }, [])
-  const login = async (email, password) => {
+  const login = async (credentials) => { const { email, password } = credentials || {};
     const res = await authAPI.login({ email, password })
     const raw = res.data?.data || res.data
     const t = raw?.token
@@ -32,3 +32,4 @@ export function AuthProvider({ children }) {
   )
 }
 export const useAuth = () => useContext(AuthContext)
+
